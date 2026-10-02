@@ -46,7 +46,7 @@ export default function ContactForm() {
             <label>Subject<select value={note.subject} onChange={update} name="subject" required><option value="" disabled>What’s on your mind?</option><option>Visiting the café</option><option>Creative workshops</option><option>Personalized gifts</option><option>Something else</option></select></label>
             <label>Message<textarea value={note.message} onChange={update} name="message" required rows={5} maxLength={2000} placeholder="Tell us a little more…" /></label>
             {attempted && <p className="validation-hint">Please complete every field and use a valid email address.</p>}
-            <button className="button" type="submit">Preview Message <span aria-hidden="true">↗</span></button>
+            <button className="button" type="submit">Preview Message <span aria-hidden="true">→</span></button>
           </form>
         </>
       )}

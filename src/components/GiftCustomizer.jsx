@@ -78,7 +78,7 @@ export default function GiftCustomizer({ item, onClose }) {
           <div className="gift-review"><p className="eyebrow">03 / REVIEW YOUR LITTLE CREATION</p>
           {summary}</div>
           <p className="form-note">Preview your request below. Your choices stay in this window and are not sent or saved.</p>
-          <button className="button full-width" type="submit">Preview Customization Request <span aria-hidden="true">↗</span></button>
+          <button className="button full-width" type="submit">Preview Customization Request <span aria-hidden="true">→</span></button>
         </form>
       )}
     </Modal>

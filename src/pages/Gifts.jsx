@@ -25,7 +25,7 @@ export default function Gifts() {
               <p>{item.description}</p>
               <div className="card-bottom">
                 <span>From {money(item.price)}</span>
-                <button className="text-link" aria-label={`Customize ${item.name}`} onClick={() => setSelected(item)}>Customize <span aria-hidden="true">↗</span></button>
+                <button className="text-link" aria-label={`Customize ${item.name}`} onClick={() => setSelected(item)}>Customize <span aria-hidden="true">→</span></button>
               </div>
             </article>
           ))}

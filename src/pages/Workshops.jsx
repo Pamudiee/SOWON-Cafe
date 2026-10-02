@@ -49,7 +49,7 @@ function ReservationPreview({ workshop, day, time, onClose }) {
           {attempted && <p className="validation-hint">Please add your name and a valid email address.</p>}
           <p className="reservation-total" role="status">{money(workshop.price)} × {guests} {guests === 1 ? 'guest' : 'guests'} <strong>{money(workshop.price * guests)}</strong></p>
           <button className="text-link back-link" type="button" onClick={() => setStep('details')}>← Workshop details</button>
-          <button className="button" type="submit">Preview Reservation <span aria-hidden="true">↗</span></button>
+          <button className="button" type="submit">Preview Reservation <span aria-hidden="true">→</span></button>
         </form>
       ) : (
         <>
@@ -63,7 +63,7 @@ function ReservationPreview({ workshop, day, time, onClose }) {
             <div><dt>Suitable for</dt><dd>Ages 16+ · Beginners welcome</dd></div>
             <div><dt>Sample availability</dt><dd>{workshop.spots} spots · {money(workshop.price)} / person</dd></div>
           </dl>
-          <button className="button" onClick={() => setStep('reserve')}>Reserve a Spot <span aria-hidden="true">↗</span></button>
+          <button className="button" onClick={() => setStep('reserve')}>Reserve a Spot <span aria-hidden="true">→</span></button>
           <p className="form-note">Sample schedule. Reservations are a frontend preview.</p>
         </>
       )}
@@ -103,7 +103,7 @@ export default function Workshops() {
                 </dl>
                 <div className="card-bottom">
                   <span className="spots">{item.spots} places available*</span>
-                  <button className="text-link" aria-label={`Details and reservation for ${item.name}`} onClick={() => setSelected(item)}>Details & Reserve <span aria-hidden="true">↗</span></button>
+                  <button className="text-link" aria-label={`Details and reservation for ${item.name}`} onClick={() => setSelected(item)}>Details & Reserve <span aria-hidden="true">→</span></button>
                 </div>
               </div>
             </article>

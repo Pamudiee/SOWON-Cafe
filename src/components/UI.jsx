@@ -11,7 +11,7 @@ export function Image({ src, alt, className = '', eager = false }) {
 }
 
 export function Heading({ eyebrow, title, children, link, href }) {
-  return <div className="section-heading"><div><p className="eyebrow">{eyebrow}</p><h2>{title}</h2>{children && <p>{children}</p>}</div>{link && <a className="text-link" href={href}>{link} <span aria-hidden="true">↗</span></a>}</div>
+  return <div className="section-heading"><div><p className="eyebrow">{eyebrow}</p><h2>{title}</h2>{children && <p>{children}</p>}</div>{link && <a className="text-link" href={href}>{link} <span aria-hidden="true">→</span></a>}</div>
 }
 
 export function PageIntro({ eyebrow, title, children }) {
@@ -56,5 +56,5 @@ export function Modal({ title, children, onClose, className = '' }) {
 }
 
 export function VisitCTA() {
-  return <section className="visit-cta"><span className="line-flower" aria-hidden="true">✳</span><p className="eyebrow">THERE’S A PLACE FOR YOU HERE</p><h2>Make a little time<br />for yourself.</h2><p>A good cup. A new hobby. A moment that’s yours in {cafe.location}.</p><a href="#contact" className="button">Come say hello <span aria-hidden="true">↗</span></a></section>
+  return <section className="visit-cta"><span className="line-flower" aria-hidden="true">✳</span><p className="eyebrow">THERE’S A PLACE FOR YOU HERE</p><h2>Make a little time<br />for yourself.</h2><p>A good cup. A new hobby. A moment that’s yours in {cafe.location}.</p><a href="#contact" className="button">Come say hello <span aria-hidden="true">→</span></a></section>
 }
