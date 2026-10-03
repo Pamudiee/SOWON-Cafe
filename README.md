@@ -24,7 +24,7 @@ npm run preview
 - Menu and gift category filters.
 - Separate weekday and weekend workshop schedules, details, and a reservation preview.
 - Gift personalization with color, name, message, packaging, gift notes, add-ons, plushie styles, and a live estimate.
-- Contact form with native validation and an honest frontend-only confirmation.
+- Contact form with native validation, Supabase submission, loading feedback, and retry support.
 - Native modal dialogs with keyboard containment, Escape dismissal, and focus restoration; visible focus styles, a skip link, and reduced-motion support.
 
 ## Structure
@@ -36,13 +36,13 @@ npm run preview
 
 ## Concept details
 
-SOWON is a fictional portfolio brand. Contact information, workshop availability, product descriptions, and Sri Lankan Rupee (LKR) prices are illustrative. Forms do not send, store, reserve, purchase, or process payments. Personalization state is held in memory and resets when its dialog closes.
+SOWON is a fictional portfolio brand. Contact information, workshop availability, product descriptions, and Sri Lankan Rupee (LKR) prices are illustrative. The contact form stores messages in Supabase. Workshop and gift flows remain previews and do not reserve, purchase, or process payments. Personalization state is held in memory and resets when its dialog closes.
 
 Photography uses remote Unsplash placeholders; font styles use Google Fonts (DM Sans and Playfair Display). These require internet access. Images have styled fallbacks and fonts fall back to local serif/sans-serif families. Product photography is illustrative and should be replaced with owned product images before a real launch.
 
 ## Deployment
 
-Publish the `dist/` directory after running `npm run build`. For hosting under a subdirectory, configure Vite's `base` to that path before building. No backend or secrets are required.
+Publish the `dist/` directory after running `npm run build`. For hosting under a subdirectory, configure Vite's `base` to that path before building. Contact submissions require the existing Supabase table and `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY` at build time. Use only the publishable key in the frontend; no service-role key is needed.
 
 ## Refinement and validation
 
@@ -50,9 +50,9 @@ The editorial design uses espresso typography, warm ivory surfaces, olive accent
 
 Gift customization offers category-specific styles and personalization, included packaging or a priced upgrade, optional extras, and an itemized live summary. Workshop reservation previews preserve details when returning to the description and calculate totals by guest count. Both flows clearly remain previews.
 
-Responsive browser checks cover every page at 320, 390, 768, 1024, and 1440 pixels. Validated interactions include category filtering, unchanged workshop types when schedules switch, reservation totals, gift totals, contact previews, Escape dismissal, and mobile navigation focus restoration. Native dialogs provide keyboard focus containment. Remote photography remains illustrative.
+Responsive browser checks cover every page at 320, 390, 768, 1024, and 1440 pixels. Validated interactions include category filtering, unchanged workshop types when schedules switch, reservation totals, gift totals, the previous contact preview flow, Escape dismissal, and mobile navigation focus restoration. Native dialogs provide keyboard focus containment. Remote photography remains illustrative.
 
-The latest finishing pass adds an editable contact-message preview, visible gift color selections, itemized reservation summaries, clearer active navigation, and consistent image sizing through tablet breakpoints. All existing experiences remain frontend-only. Browser checks use temporary files and an isolated browser profile outside the project.
+The responsive finishing pass added visible gift color selections, itemized reservation summaries, clearer active navigation, and consistent image sizing through tablet breakpoints. The contact preview has since been connected to Supabase; workshop and gift flows remain frontend-only. Browser checks use temporary files and an isolated browser profile outside the project.
 
 ## Sri Lankan localization
 
