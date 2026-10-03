@@ -1,4 +1,44 @@
-# Contact-message database setup
+# Supabase database setup
+
+## Workshop reservations
+
+New migration: `migrations/20261003010000_create_workshop_reservations.sql`.
+It has not been applied automatically, and no test reservations were submitted.
+The existing contact-message migration and table are unchanged.
+
+### Apply manually
+
+1. Open the intended Supabase project dashboard and its SQL Editor.
+2. Copy the complete new workshop migration into a new query and run it once.
+   Do not rerun the contact-message migration if it is already applied.
+3. Verify `public.workshop_reservations`, its column grants, and its INSERT-only
+   RLS policy in the dashboard. If the table already exists, stop and review it;
+   the migration fails rather than replacing or modifying an existing table.
+4. Ensure the local `.env` has `VITE_SUPABASE_URL` and
+   `VITE_SUPABASE_PUBLISHABLE_KEY`, then restart Vite. Never use a service-role key.
+
+The table stores server-generated `id` (UUID) and `created_at` (timestamp with
+time zone), plus `workshop_name` (text), `customer_name` (up to 80 characters),
+`email` (text), `guests` (positive integer), `price_per_person` (numeric 10,2),
+and `total_price` (numeric 12,2). Prices are in Sri Lankan rupees. Required text
+cannot be blank, and the total must equal the price per person times the guests.
+
+RLS is enabled. Default privileges are revoked from PUBLIC, anon, and
+authenticated; only anon receives INSERT access to the six submitted columns.
+Visitors cannot SELECT, UPDATE, DELETE, or supply metadata. No authenticated
+client access is granted. The form uses the existing `getSupabase()` client and
+does not request returned rows with `.select()`.
+
+The existing Details & Reserve → Reserve a Spot flow now submits a request,
+blocks repeat submissions while sending, clears the form after success, and
+keeps entered data after failure. Confirmation emails must be handled manually;
+this integration does not send emails. Session/date and live capacity are not
+stored or managed. Displayed schedules remain illustrative, and a request is
+not a confirmed seat. Prices come from the frontend: the database checks their
+arithmetic, not the catalogue price. Review requests before confirming them.
+No payment is collected. Live database permissions/submission remain untested.
+
+## Contact-message database setup
 
 Prepared migration: `migrations/20261003000000_create_contact_messages.sql`.
 The form integration does not apply this migration or change the database. No test messages were submitted during implementation.

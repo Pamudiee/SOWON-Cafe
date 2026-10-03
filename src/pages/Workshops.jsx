@@ -1,4 +1,5 @@
-﻿import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { getSupabase } from '../lib/supabase'
 import { workshops, money } from '../data/catalog'
 import { cafe } from '../data/cafe'
 import { PageIntro, Image, Filters, Modal } from '../components/UI'
@@ -14,42 +15,90 @@ function ReservationSummary({ workshop, day, time, guests }) {
         <div><dt>Guests</dt><dd>{guests} × {money(workshop.price)}</dd></div>
         <div><dt>Included</dt><dd>Materials, guidance & a drink</dd></div>
       </dl>
-      <div className="summary-total"><span>Sample total</span><strong>{money(workshop.price * guests)}</strong></div>
+      <div className="summary-total"><span>Total</span><strong>{money(workshop.price * guests)}</strong></div>
     </section>
   )
 }
 
-function ReservationPreview({ workshop, day, time, onClose }) {
+function ReservationForm({ workshop, day, time, onClose }) {
   const [step, setStep] = useState('details')
   const [guests, setGuests] = useState(1)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [attempted, setAttempted] = useState(false)
-  const title = step === 'complete' ? 'Your little plan is ready.' : step === 'reserve' ? 'Make room for a moment.' : workshop.name
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  const [submittedGuests, setSubmittedGuests] = useState(1)
+  const requestInProgress = useRef(false)
+  const title = step === 'complete' ? 'Your request is received.' : step === 'reserve' ? 'Make room for a moment.' : workshop.name
+
+  async function handleSubmit(event) {
+    event.preventDefault()
+    if (requestInProgress.current) return
+    setAttempted(true)
+    if (!event.currentTarget.reportValidity() || !name.trim()) return
+    requestInProgress.current = true
+    setSubmitting(true)
+    setError('')
+    try {
+      const { error: submissionError } = await getSupabase()
+        .schema('public')
+        .from('workshop_reservations')
+        .insert({
+          workshop_name: workshop.name,
+          customer_name: name.trim(),
+          email: email.trim(),
+          guests,
+          price_per_person: workshop.price,
+          total_price: workshop.price * guests,
+        })
+      if (submissionError) throw submissionError
+      setSubmittedGuests(guests)
+      setName('')
+      setEmail('')
+      setGuests(1)
+      setAttempted(false)
+      setStep('complete')
+    } catch {
+      setError('We couldn’t send your reservation request. Please try again. Your details are still here.')
+    } finally {
+      requestInProgress.current = false
+      setSubmitting(false)
+    }
+  }
+
+  function handleClose(event) {
+    if (requestInProgress.current) {
+      event?.preventDefault()
+      return
+    }
+    onClose()
+  }
   return (
-    <Modal title={title} onClose={onClose}>
+    <Modal title={title} onClose={handleClose}>
       {step === 'complete' ? (
         <div className="success" role="status">
           <span aria-hidden="true">✳</span>
-          <p>Your reservation preview is complete. Nothing has been sent and no spot has been booked.</p>
-          <ReservationSummary workshop={workshop} day={day} time={time} guests={guests} />
-          <div className="form-actions"><button className="button" onClick={onClose}>Keep exploring</button><button className="text-link" onClick={() => setStep('reserve')}>Edit preview</button></div>
+          <p>Thank you! Your reservation request has been received. We’ll email you to confirm the session and availability.</p>
+          <ReservationSummary workshop={workshop} day={day} time={time} guests={submittedGuests} />
+          <div className="form-actions"><button className="button" onClick={onClose}>Keep exploring</button><button className="text-link" onClick={() => setStep('reserve')}>New reservation</button></div>
         </div>
       ) : step === 'reserve' ? (
-        <form className={attempted ? 'validation-attempted' : ''} onInvalid={() => setAttempted(true)} onSubmit={event => { event.preventDefault(); setStep('complete') }}>
+        <form className={attempted ? 'validation-attempted' : ''} onInvalid={() => setAttempted(true)} onSubmit={handleSubmit} aria-busy={submitting}>
           <ReservationSummary workshop={workshop} day={day} time={time} guests={guests} />
-          <p className="form-note">Explore a sample reservation. Your details will not be sent or saved.</p>
-          <label>Your name<input required value={name} onChange={event => setName(event.target.value)} autoComplete="name" maxLength={80} /></label>
-          <label>Email address<input required value={email} onChange={event => setEmail(event.target.value)} type="email" autoComplete="email" /></label>
+          <p className="form-note">Send a reservation request. We’ll confirm the session and availability by email. No payment is taken.</p>
+          <label>Your name<input required disabled={submitting} value={name} onChange={event => setName(event.target.value)} autoComplete="name" maxLength={80} pattern=".*\S.*" /></label>
+          <label>Email address<input required disabled={submitting} value={email} onChange={event => setEmail(event.target.value)} type="email" autoComplete="email" /></label>
           <label>Guests
-            <select value={guests} onChange={event => setGuests(Number(event.target.value))}>
+            <select disabled={submitting} value={guests} onChange={event => setGuests(Number(event.target.value))}>
               {Array.from({ length: workshop.spots }, (_, i) => <option key={i} value={i + 1}>{i + 1}</option>)}
             </select>
           </label>
           {attempted && <p className="validation-hint">Please add your name and a valid email address.</p>}
           <p className="reservation-total" role="status">{money(workshop.price)} × {guests} {guests === 1 ? 'guest' : 'guests'} <strong>{money(workshop.price * guests)}</strong></p>
-          <button className="text-link back-link" type="button" onClick={() => setStep('details')}>← Workshop details</button>
-          <button className="button" type="submit">Preview Reservation <span aria-hidden="true">→</span></button>
+          {error && <p className="validation-hint" role="alert">{error}</p>}
+          <button className="text-link back-link" type="button" disabled={submitting} onClick={() => setStep('details')}>← Workshop details</button>
+          <button className="button" type="submit" disabled={submitting}>{submitting ? 'Sending request…' : 'Submit Reservation'} <span aria-hidden="true">→</span></button>
         </form>
       ) : (
         <>
@@ -64,7 +113,7 @@ function ReservationPreview({ workshop, day, time, onClose }) {
             <div><dt>Sample availability</dt><dd>{workshop.spots} spots · {money(workshop.price)} / person</dd></div>
           </dl>
           <button className="button" onClick={() => setStep('reserve')}>Reserve a Spot <span aria-hidden="true">→</span></button>
-          <p className="form-note">Sample schedule. Reservations are a frontend preview.</p>
+          <p className="form-note">Sample schedule. Session and availability will be confirmed by email after your request.</p>
         </>
       )}
     </Modal>
@@ -111,7 +160,7 @@ export default function Workshops() {
         </div>
         <p className="catalog-note">*Illustrative weekly schedule and availability. All six workshops welcome beginners.<br />Materials and a signature café drink are included in every session.</p>
       </section>
-      {selected && <ReservationPreview workshop={selected} day={weekend ? selected.weekendDay : selected.day} time={weekend ? selected.weekendTime : selected.time} onClose={() => setSelected(null)} />}
+      {selected && <ReservationForm workshop={selected} day={weekend ? selected.weekendDay : selected.day} time={weekend ? selected.weekendTime : selected.time} onClose={() => setSelected(null)} />}
     </>
   )
 }
