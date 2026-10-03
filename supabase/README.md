@@ -31,8 +31,14 @@ does not request returned rows with `.select()`.
 
 The existing Details & Reserve → Reserve a Spot flow now submits a request,
 blocks repeat submissions while sending, clears the form after success, and
-keeps entered data after failure. Confirmation emails must be handled manually;
-this integration does not send emails. Session/date and live capacity are not
+keeps entered data after failure. After a successful insert, the existing
+`send-workshop-confirmation` Edge Function is invoked through the Supabase client
+with `email`, `customer_name`, `workshop_name`, `guests`, `total_price`, `day`, and
+`time`. The form has a recurring day/time, not a calendar date. Email failures
+preserve the successful reservation, display a safe notice, and never retry the
+insert. Resend credentials remain in the deployed function, not the frontend.
+The deployed function's payload contract and live email delivery have not been
+tested here; no test reservations or emails were sent. Session/date and live capacity are not
 stored or managed. Displayed schedules remain illustrative, and a request is
 not a confirmed seat. Prices come from the frontend: the database checks their
 arithmetic, not the catalogue price. Review requests before confirming them.

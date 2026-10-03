@@ -28,6 +28,7 @@ function ReservationForm({ workshop, day, time, onClose }) {
   const [attempted, setAttempted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [emailNotice, setEmailNotice] = useState('')
   const [submittedGuests, setSubmittedGuests] = useState(1)
   const requestInProgress = useRef(false)
   const title = step === 'complete' ? 'Your request is received.' : step === 'reserve' ? 'Make room for a moment.' : workshop.name
@@ -40,6 +41,7 @@ function ReservationForm({ workshop, day, time, onClose }) {
     requestInProgress.current = true
     setSubmitting(true)
     setError('')
+    setEmailNotice('')
     try {
       const { error: submissionError } = await getSupabase()
         .schema('public')
@@ -53,6 +55,28 @@ function ReservationForm({ workshop, day, time, onClose }) {
           total_price: workshop.price * guests,
         })
       if (submissionError) throw submissionError
+      // Email delivery is separate: its failure must never retry the saved reservation.
+      try {
+        const { data, error: emailError } = await getSupabase().functions.invoke(
+          'send-workshop-confirmation',
+          {
+            body: {
+              email: email.trim(),
+              customer_name: name.trim(),
+              workshop_name: workshop.name,
+              guests,
+              total_price: workshop.price * guests,
+              day,
+              time,
+            },
+          },
+        )
+        if (emailError || data?.error || data?.success === false) {
+          throw new Error('Confirmation unavailable')
+        }
+      } catch {
+        setEmailNotice('Your reservation request is saved, but we couldn’t confirm email delivery. Please contact the café if you need help. There is no need to submit again.')
+      }
       setSubmittedGuests(guests)
       setName('')
       setEmail('')
@@ -81,6 +105,7 @@ function ReservationForm({ workshop, day, time, onClose }) {
           <span aria-hidden="true">✳</span>
           <p>Thank you! Your reservation request has been received. We’ll email you to confirm the session and availability.</p>
           <ReservationSummary workshop={workshop} day={day} time={time} guests={submittedGuests} />
+          {emailNotice && <p className="form-note">{emailNotice}</p>}
           <div className="form-actions"><button className="button" onClick={onClose}>Keep exploring</button><button className="text-link" onClick={() => setStep('reserve')}>New reservation</button></div>
         </div>
       ) : step === 'reserve' ? (
