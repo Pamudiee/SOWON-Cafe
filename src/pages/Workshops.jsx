@@ -53,6 +53,8 @@ function ReservationForm({ workshop, day, time, onClose }) {
           guests,
           price_per_person: workshop.price,
           total_price: workshop.price * guests,
+          day,
+          time,
         })
       if (submissionError) throw submissionError
       // Email delivery is separate: its failure must never retry the saved reservation.
